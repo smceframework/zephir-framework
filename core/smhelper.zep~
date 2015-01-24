@@ -1,0 +1,60 @@
+namespace Smce\Core;
+
+class SmHelper
+{
+    public static function array_first(command, myArray)
+    {
+        
+        return array_shift(array_filter(myArray, command));
+    }
+    
+    public static function array_last(command, myArray)
+    {
+        
+        return end(array_filter(myArray, command));
+    }
+    
+    
+    public static function array_flatten(myArray)
+    {
+        var array_re, rarray, value;
+    
+        
+        let array_re =  [];
+        let rarray =  new \RecursiveIteratorIterator(new \RecursiveArrayIterator(myArray));
+        for value in rarray {
+            let array_re[] = value;
+        }
+        
+        return array_re;
+    }
+    
+    public static function array_get(myArray, params)
+    {
+        var prEx;
+    
+        
+        if is_null(params) {
+            
+            return myArray;
+        }
+        
+        if isset myArray[params] {
+            
+            return myArray[params];
+        }
+        for prEx in explode(".", params) {
+            let myArray = myArray[prEx];
+        }
+        
+        return myArray;
+    }
+    
+    public static function array_sort(command, myArray)
+    {
+        usort(myArray, command);
+        
+        return myArray;
+    }
+
+}
