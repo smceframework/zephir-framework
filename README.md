@@ -1,2 +1,2 @@
 # zephir-framework
-zephir framework
+zephir Smceframework
