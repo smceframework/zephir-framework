@@ -10,8 +10,9 @@ namespace Smce\Core;
 class SmRouter
 {
     protected router;
-    protected route;
-    protected request;
+    protected route="";
+    protected request="";
+    protected requestArray = ["controller" : "", "view" : ""];
     /**
      * @param $request
      * 
@@ -42,6 +43,56 @@ class SmRouter
         let this->route = route;
     }
     
+    protected function scriptNameIsFalse()
+    {
+        var requestArray, routeGetEx;
+    
+        let requestArray =  this->requestArray;
+        
+        if isset this->route {
+            let routeGetEx =  explode("/", this->route);
+            
+            let requestArray =  ["controller" : 
+            isset routeGetEx[0] ? routeGetEx[0] : "", "view" : 
+            isset routeGetEx[1] ? routeGetEx[1] : ""];
+        }
+        
+        return requestArray;
+    }
+    
+    protected function scriptNameIsTrue()
+    {
+        var requestArray, parse, requestGetEx, key, value;
+    
+        let requestArray =  this->requestArray;
+        let parse =  parse_url(this->request);
+        let requestGetEx =  explode("/", parse["path"]);
+        
+        let requestArray = ["controller" :
+			isset requestGetEx[0] ? requestGetEx[0] : "", "view" :
+			isset requestGetEx[1] ? requestGetEx[1] : ""];
+			
+		if isset $this->router["router"][$requestGetEx[0]]{
+		
+			for key, value in $this->router["router"][$requestGetEx[0]]{
+				if isset requestGetEx[key + 2] {
+				
+					let requestArray[value] = requestGetEx[key + 2];
+					
+				}
+			}
+		} else {
+            for key, value in this->router["router"]["all"] {
+                
+                if isset requestGetEx[key + 2] {
+                    let requestArray[value] = requestGetEx[key + 2];
+                }
+            }
+        }
+        
+        return requestArray;
+    }
+    
     /**
      * run
      * 
@@ -49,51 +100,19 @@ class SmRouter
      */
     public function run()
     {
-        var requestArray, routeGetEx, parse, requestGetEx, key, value;
+        var requestArray;
     
-        
-        let requestArray =  ["controller" : "", "view" : ""];
+        let requestArray =  this->requestArray;
         
         if empty(this->request) {
             
             let requestArray =  ["controller" : "site", "view" : "index"];
         } else {
             
-            let routeGetEx =  [];
-            
             if !isset this->router["showScriptName"] || this->router["showScriptName"] == false {
-                
-                if isset this->route {
-                    let routeGetEx =  explode("/", this->route);
-                    
-                    let requestArray =  ["controller" : 
-                    isset routeGetEx[0] ? routeGetEx[0] : "", "view" : 
-                    isset routeGetEx[1] ? routeGetEx[1] : ""];
-                }
+                let requestArray =  this->scriptNameIsFalse();
             } else {
-                let parse =  parse_url(this->request);
-                let requestGetEx =  explode("/", parse["path"]);
-                
-                let requestArray =  ["controller" : 
-                isset requestGetEx[0] ? requestGetEx[0] : "", "view" : 
-                isset requestGetEx[1] ? requestGetEx[1] : ""];
-                
-                if isset $this->router["router"][$requestGetEx[0]]{
-
-                    for key, value in $this->router["router"][$requestGetEx[0]]{
-                        
-                        if isset requestGetEx[key + 2] {
-                            let requestArray[value] = requestGetEx[key + 2];
-                        }
-                    }
-                } else {
-                    for key, value in this->router["router"]["all"] {
-                        
-                        if isset requestGetEx[key + 2] {
-                            let requestArray[value] = requestGetEx[key + 2];
-                        }
-                    }
-                }
+                let requestArray =  this->scriptNameIsTrue();
             }
         }
         
