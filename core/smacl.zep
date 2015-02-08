@@ -7,6 +7,7 @@
  */
 namespace Smce\Core;
 
+
 class SmACL
 {
     private ip;
@@ -22,25 +23,30 @@ class SmACL
         var value;
     
         let this->ip = ip;
-        let this->loginState = loginState;
 
-        for value in accessRules {
-            
-            if isset value["actions"] && in_array(strtolower(view), value["actions"]) {
+        for value in accessRules["actions"] 
+        {
+           
+            if isset accessRules["ip"] && this->ipAdressSearch(accessRules["ip"]) == true {
                 
-                if isset value["ip"] && this->ipAdressSearch(value["ip"]) == true {
-                    
-                    return true;
-                }
-                 
-                this->loginControl(value["users"], value["redirect"]);
-                
-                if isset value["expression"] && this->expressionControl(value["expression"]) == true {
-                    
-                    return true;
-                }
-               
+                return true;
             }
+             
+            if this->loginControl(accessRules["users"], accessRules["redirect"],loginState)==false
+            {
+
+                return false;
+
+            }
+            
+            if isset accessRules["expression"] && this->expressionControl(accessRules["expression"]) == true 
+            {
+                
+                return true;
+
+            }
+               
+            
         }
         
         return false;
@@ -68,16 +74,27 @@ class SmACL
      *
      * @redirect url
      */
-    protected function loginControl(users="", redirect = "") -> void
+     
+    protected function loginControl(users="", redirect = "",loginState)
     {
-        var controller;
+       
+        var router;
+    
         
-         if users == "@" && empty this->loginState {
-                let controller =  new SmController();
-                controller->redirect(
-                redirect == "" ? "site/login" : redirect);
-            
+        if users == "@" && empty(loginState)
+        {
+        
+            let router =  new SmRouter();
+            router->redirect(redirect == "" ? "site/login" : redirect);
+
+            return false;
+
+        }else
+        {
+
+            return true;
         }
+
     }
     
     /**
